@@ -1,0 +1,29 @@
+{
+    "name": "yuyu/file-manager",
+    "description": "Laravel package to manage storage and it's mapping",
+    "type": "library",
+    "require": {
+        "league/flysystem-aws-s3-v3": "^1.0",
+        "laravel/framework": "^5.8|^6.0"
+    },
+    "license": "Yuyu",
+    "authors": [
+        {
+            "name": "Bhushan Mer",
+            "email": "bhushanmer@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Yuyu\\FileManager\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"
+            ]
+        }
+    }
+}

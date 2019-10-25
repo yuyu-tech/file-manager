@@ -14,7 +14,7 @@ class Attachment extends Model
 
     public function delete(){
     	$this->deleted_by = session('user_id', null);
-    	$this->deleted_at = Carbon::now()->timestamp;
+    	$this->deleted_at = Carbon::now()->toDateTimeString();
     	$this->save();
     }
 }

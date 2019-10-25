@@ -28,7 +28,7 @@ class FileManagerController extends BaseController
     	if($objMorph instanceof MorphOne){
     		$objAttachment = $objAttachable->$strAttachable;
     		if(!is_null($objAttachment)){
-    			$objAttachable->$strAttachable->delete();	
+    			$objAttachable->$strAttachable->delete();
     		}
     	}
 

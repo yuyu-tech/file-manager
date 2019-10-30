@@ -6,7 +6,7 @@
         "league/flysystem-aws-s3-v3": "^1.0",
         "laravel/framework": "^5.8|^6.0"
     },
-    "license": "Yuyu",
+    "license": "MIT",
     "authors": [
         {
             "name": "Bhushan Mer",
@@ -19,9 +19,6 @@
         }
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "master"
-        },
         "laravel": {
             "providers": [
                 "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"

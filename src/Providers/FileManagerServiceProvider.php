@@ -21,6 +21,11 @@ class FileManagerServiceProvider extends ServiceProvider
             $this->registerPublishableResources();
             $this->registerConsoleCommands();
         }
+
+        // Register fileManager Service
+        $this->app->bind('fileManager', function(){
+            return new \Yuyu\FileManager\Controllers\FileManagerController;
+        });
     }
 
     /**

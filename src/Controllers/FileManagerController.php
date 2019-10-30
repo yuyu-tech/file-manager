@@ -62,12 +62,12 @@ class FileManagerController extends BaseController
     	return url('storage/' .$strType .'/'.$intAttachmentId) .'?_token=' .encrypt(json_encode($arrToken));
     }
 
-    public function viewFile($intAttachmentId, Request $request){
+    public static function viewFile($intAttachmentId, Request $request){
         $attachment = Attachment::find($intAttachmentId);
     	return response(Storage::get($attachment->upload_path .$attachment->id .'.' .$attachment->extension))->header('content-type', $attachment->mime_type);
     }
 
-    public function downloadFile($intAttachmentId, Request $request){
+    public static function downloadFile($intAttachmentId, Request $request){
     	$attachment = Attachment::find($intAttachmentId);
     	return Storage::download($attachment->upload_path .$attachment->id .'.' .$attachment->extension, $attachment->original_file_name);
     }

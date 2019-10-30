@@ -23,7 +23,10 @@
         "laravel": {
             "providers": [
                 "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "FileManager" : "Yuyu\\FileManager\\Facades\\FileManagerFacade"
+            }
         }
     }
 }

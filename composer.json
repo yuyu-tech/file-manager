@@ -20,6 +20,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-master": "master"
+        },
         "laravel": {
             "providers": [
                 "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"
@@ -28,5 +31,7 @@
                 "FileManager" : "Yuyu\\FileManager\\Facades\\FileManagerFacade"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
 }

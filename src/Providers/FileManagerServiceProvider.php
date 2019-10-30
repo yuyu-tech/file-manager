@@ -23,7 +23,7 @@ class FileManagerServiceProvider extends ServiceProvider
         }
 
         // Register fileManager Service
-        $this->app->bind('fileManager', function(){
+        $this->app->singleton('fileManager', function(){
             return new \Yuyu\FileManager\Controllers\FileManagerController;
         });
     }
@@ -58,9 +58,9 @@ class FileManagerServiceProvider extends ServiceProvider
             'migration' => [
                 "{$publishablePath}/database/migrations/" => database_path('migrations'),
             ],
-            'seeds' => [
-                "{$publishablePath}/database/seeds/" => database_path('seeds'),
-            ],
+            // 'seeds' => [
+            //     "{$publishablePath}/database/seeds/" => database_path('seeds'),
+            // ],
             'models' => [
                 "{$publishablePath}/Models" => app_path('Models'),
             ]

@@ -14,6 +14,7 @@ class CreateAttachmentsTable extends Migration
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->increments('id');
+            $table->smallInteger('attachment_type_id')->unsigned();
             $table->morphs('attachable');
             $table->string('original_file_name', 255);
             $table->string('extension', 100);
@@ -26,6 +27,8 @@ class CreateAttachmentsTable extends Migration
             $table->integer('deleted_by')->unsigned()->nullable()->default(null);
             $table->dateTime('deleted_at')->nullable()->default(null);
         });
+
+        $table->index(['attachment_type_id', 'attachable_type', 'attachable_id']);
     }
 
     /**

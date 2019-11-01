@@ -5,6 +5,7 @@ namespace Yuyu\FileManager\Controllers;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Routing\Controller as BaseController;
@@ -23,8 +24,8 @@ class FileManagerController extends BaseController
 
     public static function storeContent($content, $strFileName, $strMimeType, $strExtension, $objAttachable, $strAttachable, $strPath='test/'){
     	$objMorph = $objAttachable->$strAttachable();
-
-    	// if Main object relates one to one relationship with Attachment then we will delete pre-existing attachment before saving a new one.
+        
+        // if Main object relates one to one relationship with Attachment then we will delete pre-existing attachment before saving a new one.
     	if($objMorph instanceof MorphOne){
     		$objAttachment = $objAttachable->$strAttachable;
     		if(!is_null($objAttachment)){
@@ -32,8 +33,13 @@ class FileManagerController extends BaseController
     		}
     	}
 
+        // Fetch attachment type id from relationship where condition
+        $arrWhereConditions = Arr::pluck($objMorph->getQuery()->getQuery()->wheres, 'value', 'column');
+        $intAttachmentTypeId = $arrWhereConditions['attachment_type_id'] ?? $arrWhereConditions['attachments.attachment_type_id'] ?? null;
+
     	// Generate Attachment object
     	$objAttachment = new Attachment();
+        $objAttachment->attachment_type_id = $intAttachmentTypeId;
     	$objAttachment->upload_path = $strPath;
     	$objAttachment->attachable_type = $objMorph->getMorphClass();
     	$objAttachment->attachable_id = $objMorph->getParentKey();

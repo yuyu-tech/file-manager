@@ -26,9 +26,8 @@ class CreateAttachmentsTable extends Migration
             $table->dateTime('updated_at');
             $table->integer('deleted_by')->unsigned()->nullable()->default(null);
             $table->dateTime('deleted_at')->nullable()->default(null);
+            $table->index(['attachment_type_id', 'attachable_type', 'attachable_id'], 'attachable');
         });
-
-        $table->index(['attachment_type_id', 'attachable_type', 'attachable_id']);
     }
 
     /**

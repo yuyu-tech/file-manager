@@ -6,14 +6,13 @@
         "league/flysystem-aws-s3-v3": "^1.0",
         "laravel/framework": "^5.8|^6.0"
     },
-    "license": "Yuyu",
+    "license": "MIT",
     "authors": [
         {
             "name": "Bhushan Mer",
             "email": "bhushanmer@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
             "Yuyu\\FileManager\\": "src/"
@@ -28,5 +27,7 @@
                 "FileManager" : "Yuyu\\FileManager\\Facades\\FileManagerFacade"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

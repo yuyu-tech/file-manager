@@ -1,5 +1,5 @@
 {
-    "name": "yuyu/file-manager",
+    "name": "yuyu-tech/file-manager",
     "description": "Laravel package to manage storage and it's mapping",
     "type": "library",
     "require": {

@@ -3,16 +3,7 @@
 
 ## Installation
 ``` bash
-# Register git Repository in composer.json
-# add "secure-http": false to the config section
-# Add repostiroy 
-    "repositories": [
-        { 
-            "type": "git",
-            "url": ""
-        }
-    ]
-    
+
 # In your Laravel Project
 $ composer require yuyu/file-manager
 

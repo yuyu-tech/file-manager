@@ -16,7 +16,7 @@ class Attachment extends \Yuyu\FileManager\Models\Attachment
      * @param  integer $value (minutes after which url will be expired.)
      * @return string
      */
-    public function getFirstNameAttribute($value)
+    public function getViewAttribute($value)
     {
     	// Default expire after 1 day.
     	$value = $value??1440;
@@ -30,7 +30,7 @@ class Attachment extends \Yuyu\FileManager\Models\Attachment
      * @param  integer $value (minutes after which url will be expired.)
      * @return string
      */
-    public function getFirstNameAttribute($value)
+    public function getDownloadAttribute($value)
     {
     	// Default expire after 1 day.
     	$value = $value??1440;

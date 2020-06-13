@@ -8,14 +8,31 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Carbon\Carbon;
 use Yuyu\FileManager\Models\Attachment;
+use DB;
+
 
 class FileManagerController extends BaseController
 {
     /**
-     * 
+     * User authentication for generated url.
+     * Possible Value:
+     *  'SECURE': Url generated with an encrypted token. Caching is not possible
+     *  'GUEST': Guest URl generated. Caching enable
+     *  'USER': User authentication. Caching enable.
+     */
+    private $authenticationType = 'SECURE';
+
+    public function __construct(){
+        // $this->middleware('auth');
+        // dd(request()->user());
+    }
+
+    /**
+     *
      */
     public static function storeFile(UploadedFile $objFile, $objAttachable, $strAttachable, $strPath='test/'){
     	// Store File Content
@@ -24,7 +41,7 @@ class FileManagerController extends BaseController
 
     public static function storeContent($content, $strFileName, $strMimeType, $strExtension, $objAttachable, $strAttachable, $strPath='test/'){
     	$objMorph = $objAttachable->$strAttachable();
-        
+
         // if Main object relates one to one relationship with Attachment then we will delete pre-existing attachment before saving a new one.
     	if($objMorph instanceof MorphOne){
     		$objAttachment = $objAttachable->$strAttachable;
@@ -51,7 +68,7 @@ class FileManagerController extends BaseController
 
     	// Store Content
     	$objStorage = Storage::put($objAttachment->upload_path .$objAttachment->id .'.' .$objAttachment->extension, $content);
-    	
+
     	// Update status of Attachment object
     	$objAttachment->status = 'Uploaded';
 	    $objAttachment->save();
@@ -59,22 +76,77 @@ class FileManagerController extends BaseController
 	    return $objAttachment;
     }
 
-    public static function getAccessUrl($intAttachmentId, $strType='view', $intExpireAfter=2628000){
-    	$arrToken = [
+    public static function getAccessUrl($intAttachmentId, $strType='view', $intExpireAfter=2628000, $authType = 'SECURE'){
+        $arrToken = [
     		'id' => $intAttachmentId,
-    		'expire_at' => Carbon::now()->add($intExpireAfter .' minutes')->getTimestamp(),
     		'type' => $strType
     	];
-    	return url('storage/' .$strType .'/'.$intAttachmentId) .'?_token=' .encrypt(json_encode($arrToken));
+
+        switch (strtoupper($authType)) {
+            case 'GUEST':
+                $arrToken['auth_type'] = 'GUEST';
+                break;
+
+            case 'WEB':
+            case 'API':
+                $url = url(strtolower($authType) .'/storage/' .$strType .'/'.$intAttachmentId);
+
+                if(is_null(request()->user())){
+                    return null;
+                }
+
+                $arrToken['auth_type'] = 'USER';
+                $arrToken['user_id'] = request()->user()->id;
+                break;
+
+            default:
+                $arrToken['auth_type'] = 'SECURE';
+                $arrToken['expire_at'] = Carbon::now()->add($intExpireAfter .' minutes')->getTimestamp();
+                break;
+        }
+
+        if(empty($url))
+        {
+            $url = url('storage/' .$strType .'/'.$intAttachmentId);
+        }
+
+        $encryptQuery = 'SELECT TO_BASE64(AES_ENCRYPT(\''
+            .json_encode($arrToken)
+            .'\', \''
+            .config('app.key', '8ofmRMK70z9QOc4qvhioF00ihd6gRCW7oHShSGzn')
+            .'\')) as hash';
+
+        $token = urlencode(DB::select($encryptQuery)[0]->hash);
+
+    	return $url .'?_token=' .$token;
     }
 
     public static function viewFile($intAttachmentId, Request $request){
         $attachment = Attachment::find($intAttachmentId);
-    	return response(Storage::get($attachment->upload_path .$attachment->id .'.' .$attachment->extension))->header('content-type', $attachment->mime_type);
+        $content = Storage::get($attachment->upload_path .$attachment->id .'.' .$attachment->extension);
+
+    	$objResponse = response($content)
+            ->header('content-type', $attachment->mime_type)
+            ->header('content-length', strlen($content));
+
+        $objResponse = self::applyCaching($objResponse);
+
+        return $objResponse;
     }
 
     public static function downloadFile($intAttachmentId, Request $request){
     	$attachment = Attachment::find($intAttachmentId);
     	return Storage::download($attachment->upload_path .$attachment->id .'.' .$attachment->extension, $attachment->original_file_name);
+    }
+
+    private static function applyCaching(Response $objResponse){
+        if(config('yuyuStorage.cache.enabled', false))
+        {
+            $cacheAge = config('yuyuStorage.cache.duration', 365) * 86400;
+
+            $objResponse = $objResponse->header('Cache-Control', 'max-age=' .$cacheAge);
+        }
+
+        return $objResponse;
     }
 }

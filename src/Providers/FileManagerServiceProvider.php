@@ -58,9 +58,9 @@ class FileManagerServiceProvider extends ServiceProvider
             'migration' => [
                 "{$publishablePath}/database/migrations/" => database_path('migrations'),
             ],
-            // 'seeds' => [
-            //     "{$publishablePath}/database/seeds/" => database_path('seeds'),
-            // ],
+            'config' => [
+                "{$publishablePath}/config" => config_path(),
+            ],
             'models' => [
                 "{$publishablePath}/Models" => app_path('Models'),
             ]

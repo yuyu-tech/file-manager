@@ -15,3 +15,13 @@ Route::middleware(['guest', 'StorageAccessValidator'])->prefix('storage/')->grou
 	Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile');
 	Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile');
 });
+
+Route::middleware(['web', 'auth', 'StorageAccessValidator'])->prefix('web/storage/')->group(function(){
+	Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile');
+	Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile');
+});
+
+Route::middleware(['web', 'auth:api', 'StorageAccessValidator'])->prefix('api/storage/')->group(function(){
+	Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile');
+	Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile');
+});

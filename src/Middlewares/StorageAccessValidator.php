@@ -1,6 +1,6 @@
 <?php
 
-namespace Yuyu\FileManager\Middleware;
+namespace Yuyu\FileManager\Middlewares;
 
 use Closure;
 use Illuminate\Validation\Rule;
@@ -20,7 +20,7 @@ class StorageAccessValidator
     public function handle($request, Closure $next)
     {
         // decrypt token
-        try{
+        try {
             $query = 'SELECT AES_DECRYPT(FROM_BASE64(\''
             .$request->_token
             .'\'), \''
@@ -28,8 +28,7 @@ class StorageAccessValidator
             .'\') as token';
 
             $arrToken = json_decode(DB::select($query)[0]->token, 1);
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             abort(404);
         }
 
@@ -39,8 +38,7 @@ class StorageAccessValidator
                 break;
 
             case 'USER':
-                if(empty($request->user()->id))
-                {
+                if (empty($request->user()->id)) {
                     abort('404');
                 }
 
@@ -58,7 +56,7 @@ class StorageAccessValidator
 
         $validator = Validator::make($arrToken, $arrRule);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             abort(404);
         }
 

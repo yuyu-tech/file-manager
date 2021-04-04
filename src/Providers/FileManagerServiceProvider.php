@@ -14,7 +14,7 @@ class FileManagerServiceProvider extends ServiceProvider
     public function register()
     {
         // Register Middleware
-        app('router')->aliasMiddleware('StorageAccessValidator', \Yuyu\FileManager\Middleware\StorageAccessValidator::class);
+        app('router')->aliasMiddleware('StorageAccessValidator', \Yuyu\FileManager\Middlewares\StorageAccessValidator::class);
 
         // Register resources and console commands if app is running in console.
         if ($this->app->runningInConsole()) {
@@ -23,7 +23,7 @@ class FileManagerServiceProvider extends ServiceProvider
         }
 
         // Register fileManager Service
-        $this->app->singleton('fileManager', function(){
+        $this->app->singleton('fileManager', function () {
             return new \Yuyu\FileManager\Controllers\FileManagerController;
         });
     }

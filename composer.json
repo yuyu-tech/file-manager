@@ -4,7 +4,8 @@
     "type": "library",
     "require": {
         "league/flysystem-aws-s3-v3": "^1.0",
-        "laravel/framework": "^5.8|^8.6"
+        "laravel/framework": "^8",
+        "imagine/imagine": "^1"
     },
     "license": "MIT",
     "authors": [

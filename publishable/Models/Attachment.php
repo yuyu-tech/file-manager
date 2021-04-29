@@ -16,12 +16,20 @@ class Attachment extends \Yuyu\FileManager\Models\Attachment
      * @param  integer $value (minutes after which url will be expired.)
      * @return string
      */
-    public function getViewAttribute($value)
+    public function getViewAttribute($strParameters)
     {
-    	// Default expire after 1 day.
-    	$value = $value??1440;
-    	// Generate View URL
-        return FileManager::getAccessUrl($this->id, 'view', $value);
+        /**
+         * strParameters
+         * @var - String
+         *
+         * AuthType:ExpiryTime
+         * Possible values for auth type: GUEST, WEB, API, SECURE
+         * Expiry time in minute
+         */
+        [$authType, $intExpireAfter] = $strParameters ? explode(':', $strParameters) : ["GUEST", 1440];
+        
+        // Generate View URL
+        return FileManager::getAccessUrl($this->id, 'view', $intExpireAfter, $authType);
     }
 
     /**
@@ -30,11 +38,19 @@ class Attachment extends \Yuyu\FileManager\Models\Attachment
      * @param  integer $value (minutes after which url will be expired.)
      * @return string
      */
-    public function getDownloadAttribute($value)
+    public function getDownloadAttribute($strParameters)
     {
-    	// Default expire after 1 day.
-    	$value = $value??1440;
-    	// Generate View URL
-        return FileManager::getAccessUrl($this->id, 'download', $value);
+        /**
+         * strParameters
+         * @var - String
+         *
+         * AuthType:ExpiryTime
+         * Possible values for auth type: GUEST, WEB, API, SECURE
+         * Expiry time in minute
+         */
+        [$authType, $intExpireAfter] = $strParameters ? explode(':', $strParameters) : ["GUEST", 1440];
+
+        // Generate Download URL
+        return FileManager::getAccessUrl($this->id, 'download', $intExpireAfter, $authType);
     }
 }

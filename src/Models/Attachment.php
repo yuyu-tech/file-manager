@@ -5,6 +5,7 @@ namespace Yuyu\FileManager\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use FileManager;
 
 class Attachment extends Model
 {

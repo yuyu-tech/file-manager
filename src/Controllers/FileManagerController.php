@@ -92,7 +92,7 @@ class FileManagerController extends BaseController
 
             case 'WEB':
             case 'API':
-                $url = url(strtolower($authType) .'/storage/' .$strType .'/'.$intAttachmentId);
+                $url = route(strtolower($authType) .'.' .strtolower($strType) .'.file', ['attachmentId' => $intAttachmentId]);
 
                 if (is_null(request()->user())) {
                     return null;
@@ -109,7 +109,7 @@ class FileManagerController extends BaseController
         }
 
         if (empty($url)) {
-            $url = url('storage/' .$strType .'/'.$intAttachmentId);
+            $url = route('guest.' .strtolower($strType) .'.file', ['attachmentId' => $intAttachmentId]);
         }
 
         $encryptQuery = 'SELECT TO_BASE64(AES_ENCRYPT(\''
@@ -162,7 +162,7 @@ class FileManagerController extends BaseController
 
     private static function processImage($content, $format)
     {
-        $imagine = (new Imagine)->load($content);
+        $imagine = (new Imagine())->load($content);
         $resolution = request('resolution');
 
         if (!empty($resolution)) {

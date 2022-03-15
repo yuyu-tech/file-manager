@@ -11,7 +11,7 @@
 |
 */
 
-Route::middleware(['guest', 'StorageAccessValidator'])->prefix('storage/')->group(function () {
+Route::middleware(['guest', 'StorageAccessValidator'])->prefix('guest/storage/')->group(function () {
     Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile')->name('guest.view.file');
     Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile')->name('guest.download.file');
 });

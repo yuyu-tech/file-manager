@@ -72,7 +72,7 @@ class FileManagerController extends BaseController
         $objAttachment->save();
 
         // Store Content
-        $objStorage = Storage::put($objAttachment->upload_path .$objAttachment->id .'.' .$objAttachment->extension, $content, $premission);
+        $objStorage = Storage::put($objAttachment->upload_path .$objAttachment->id .'.' .$objAttachment->extension, $content, (config('filesystems.default') === 's3' ? $premission : null));
 
         // Update status of Attachment object
         $objAttachment->status = 'Uploaded';
@@ -86,13 +86,13 @@ class FileManagerController extends BaseController
             $compressionInfo = config('yuyuStorage.compress.image');
 
             if(!empty($compressionInfo['thumbnail'])) {
-                CompressImage::dispatchSync($objAttachment, base64_encode($content), 'thumbnail', $compressionInfo['thumbnail']['width'], $compressionInfo['thumbnail']['height']);
+                CompressImage::dispatch($objAttachment, base64_encode($content), 'thumbnail', $compressionInfo['thumbnail']['width'], $compressionInfo['thumbnail']['height']);
             }
 
             if(!empty($compressionInfo['regular_comression'])) {
                 $typeId = $compressionInfo['regular_comression']['attachment_type_id'];
                 foreach($compressionInfo['regular_comression']['resolutions'] as $resolution) {
-                    CompressImage::dispatchSync($objAttachment, base64_encode($content), 'compressedImages', $resolution['width'], $resolution['height']);
+                    CompressImage::dispatch($objAttachment, base64_encode($content), 'compressedImages', $resolution['width'], $resolution['height']);
                 }
             }
         }

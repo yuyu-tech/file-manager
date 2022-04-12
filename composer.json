@@ -9,6 +9,9 @@
             "email": "bhushanmer@gmail.com"
         }
     ],
+    "require": {
+        "spatie/image": "*"
+    },
     "autoload": {
         "psr-4": {
             "Yuyu\\FileManager\\": "src/"
@@ -20,7 +23,7 @@
                 "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"
             ],
             "aliases": {
-                "FileManager" : "Yuyu\\FileManager\\Facades\\FileManagerFacade"
+                "FileManager": "Yuyu\\FileManager\\Facades\\FileManagerFacade"
             }
         }
     },

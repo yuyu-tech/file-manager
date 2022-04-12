@@ -27,7 +27,7 @@ class Attachment extends \Yuyu\FileManager\Models\Attachment
          * Expiry time in minute
          */
         [$authType, $intExpireAfter] = $strParameters ? explode(':', $strParameters) : ["GUEST", 1440];
-        
+
         // Generate View URL
         return FileManager::getAccessUrl($this->id, 'view', $intExpireAfter, $authType);
     }

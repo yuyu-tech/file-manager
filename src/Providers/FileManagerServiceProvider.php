@@ -2,7 +2,10 @@
 
 namespace Yuyu\FileManager\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Yuyu\FileManager\Events\AttachmentDeleted;
+use Yuyu\FileManager\Listeners\DeleteAttachmentDependency;
 
 class FileManagerServiceProvider extends ServiceProvider
 {
@@ -37,6 +40,11 @@ class FileManagerServiceProvider extends ServiceProvider
     {
         // Routes using scopes
         include __DIR__.'/../../routes/fileManager.php';
+
+        Event::listen(
+            AttachmentDeleted::class,
+            [DeleteAttachmentDependency::class, 'handle']
+        );
     }
 
     /**

@@ -2,19 +2,21 @@
 
 namespace Yuyu\FileManager\Controllers;
 
-use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Arr;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller as BaseController;
-use Carbon\Carbon;
-use Yuyu\FileManager\Models\Attachment;
 use DB;
-use Imagine\Gd\Imagine;
+
+use Carbon\Carbon;
 use Imagine\Image\Box;
+use Imagine\Gd\Imagine;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Yuyu\FileManager\Models\Attachment;
+use Yuyu\FileManager\Jobs\CompressImage;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Routing\Controller as BaseController;
 
 class FileManagerController extends BaseController
 {
@@ -34,13 +36,13 @@ class FileManagerController extends BaseController
     /**
      *
      */
-    public static function storeFile(UploadedFile $objFile, $objAttachable, $strAttachable, $strPath='test/')
+    public static function storeFile(UploadedFile $objFile, $objAttachable, $strAttachable, $strPath='test/', $premission = null, $compressFile = false)
     {
         // Store File Content
-        return self::storeContent($objFile->get(), $objFile->getClientOriginalName(), $objFile->getMimeType(), $objFile->extension(), $objAttachable, $strAttachable, $strPath);
+        return self::storeContent($objFile->get(), $objFile->getClientOriginalName(), $objFile->getMimeType(), $objFile->extension(), $objAttachable, $strAttachable, $strPath, $premission, $compressFile);
     }
 
-    public static function storeContent($content, $strFileName, $strMimeType, $strExtension, $objAttachable, $strAttachable, $strPath='test/')
+    public static function storeContent($content, $strFileName, $strMimeType, $strExtension, $objAttachable, $strAttachable, $strPath='test/', $premission = null, $compressFile = false)
     {
         $objMorph = $objAttachable->$strAttachable();
 
@@ -57,7 +59,7 @@ class FileManagerController extends BaseController
         $intAttachmentTypeId = $arrWhereConditions['attachment_type_id'] ?? $arrWhereConditions['attachments.attachment_type_id'] ?? null;
 
         // Generate Attachment object
-        $objAttachment = new Attachment();
+        $objAttachment = new (config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment'));
         $objAttachment->attachment_type_id = $intAttachmentTypeId;
         $objAttachment->upload_path = $strPath;
         $objAttachment->attachable_type = $objMorph->getMorphClass();
@@ -65,15 +67,35 @@ class FileManagerController extends BaseController
         $objAttachment->mime_type = $strMimeType;
         $objAttachment->extension = $strExtension;
         $objAttachment->original_file_name = $strFileName;
+        $objAttachment->permission = $premission;
         $objAttachment->created_by = session('user_id', null);
         $objAttachment->save();
 
         // Store Content
-        $objStorage = Storage::put($objAttachment->upload_path .$objAttachment->id .'.' .$objAttachment->extension, $content);
+        $objStorage = Storage::put($objAttachment->upload_path .$objAttachment->id .'.' .$objAttachment->extension, $content, $premission);
 
         // Update status of Attachment object
         $objAttachment->status = 'Uploaded';
         $objAttachment->save();
+
+        if(!$compressFile) {
+            return $objAttachment;
+        }
+
+        if(Str::startsWith($objAttachment->mime_type, 'image/')) {
+            $compressionInfo = config('yuyuStorage.compress.image');
+
+            if(!empty($compressionInfo['thumbnail'])) {
+                CompressImage::dispatchSync($objAttachment, base64_encode($content), 'thumbnail', $compressionInfo['thumbnail']['width'], $compressionInfo['thumbnail']['height']);
+            }
+
+            if(!empty($compressionInfo['regular_comression'])) {
+                $typeId = $compressionInfo['regular_comression']['attachment_type_id'];
+                foreach($compressionInfo['regular_comression']['resolutions'] as $resolution) {
+                    CompressImage::dispatchSync($objAttachment, base64_encode($content), 'compressedImages', $resolution['width'], $resolution['height']);
+                }
+            }
+        }
 
         return $objAttachment;
     }
@@ -129,10 +151,11 @@ class FileManagerController extends BaseController
         $arrMimeType = explode('/', $attachment->mime_type);
         $content = Storage::get($attachment->upload_path .$attachment->id .'.' .$attachment->extension);
 
-        switch ($arrMimeType[0]) {
-            case 'image':
-                $content = self::processImage($content, $arrMimeType[1]);
-        }
+        // remove image processing
+        // switch ($arrMimeType[0]) {
+        //     case 'image':
+        //         $content = self::processImage($content, $arrMimeType[1]);
+        // }
 
         $objResponse = response($content)
             ->header('content-type', $attachment->mime_type)
@@ -158,6 +181,26 @@ class FileManagerController extends BaseController
         }
 
         return $objResponse;
+    }
+
+    private static function generateS3Url(int $intAttachmentId, $strType, $intExpireAfter) {
+        $attachment = Attachment::find($intAttachmentId);
+        $arrMimeType = explode('/', $attachment->mime_type);
+        $filePath = $attachment->upload_path .$attachment->id .'.' .$attachment->extension;
+        if($strType === 'download') {
+            return Storage::temporaryUrl($filePath, now()->addMinutes($intExpireAfter));
+        }
+        else {
+            return Storage::temporaryUrl(
+                $filePath,
+                now()->addMinutes($intExpireAfter)
+                [
+                    'ResponseContentType' => 'application/octet-stream',
+                    'ResponseContentDisposition' => "attachment; filename={$attachment->original_file_name}",
+                ]
+            );
+        }
+
     }
 
     private static function processImage($content, $format)

@@ -193,7 +193,7 @@ class FileManagerController extends BaseController
         else {
             return Storage::temporaryUrl(
                 $filePath,
-                now()->addMinutes($intExpireAfter)
+                now()->addMinutes($intExpireAfter),
                 [
                     'ResponseContentType' => 'application/octet-stream',
                     'ResponseContentDisposition' => "attachment; filename={$attachment->original_file_name}",

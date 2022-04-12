@@ -20,7 +20,7 @@ class CreateAttachmentsTable extends Migration
             $table->string('extension', 100);
             $table->string('upload_path', 255)->nullable()->default(null);
             $table->string('mime_type', 100);
-            $table->string('permission', 55);
+            $table->string('permission', 55)->nullable();
             $table->enum('status', ['Pending', 'Uploaded', 'Archived', 'Deleted'])->default('Pending');
             $table->integer('created_by')->unsigned()->nullable()->default(null);
             $table->dateTime('created_at');

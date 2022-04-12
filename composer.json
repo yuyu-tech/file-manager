@@ -1,6 +1,7 @@
 {
     "name": "yuyu-tech/file-manager",
     "description": "Laravel package to manage storage and it's mapping",
+    "keywords": ["laravel", "file manager"],
     "type": "library",
     "license": "MIT",
     "authors": [

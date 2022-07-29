@@ -4,8 +4,7 @@ namespace Yuyu\FileManager\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Yuyu\FileManager\Events\AttachmentDeleted;
-use Yuyu\FileManager\Listeners\DeleteAttachmentDependency;
+use Yuyu\FileManager\Providers\FileManagerEventServiceProvider;
 
 class FileManagerServiceProvider extends ServiceProvider
 {
@@ -16,6 +15,9 @@ class FileManagerServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Register event service provider
+        $this->app->register(FileManagerEventServiceProvider::class);
+
         // Register Middleware
         app('router')->aliasMiddleware('StorageAccessValidator', \Yuyu\FileManager\Middlewares\StorageAccessValidator::class);
 
@@ -27,7 +29,7 @@ class FileManagerServiceProvider extends ServiceProvider
 
         // Register fileManager Service
         $this->app->singleton('fileManager', function () {
-            return new \Yuyu\FileManager\Controllers\FileManagerController;
+            return new \Yuyu\FileManager\Controllers\FileManagerController();
         });
     }
 
@@ -40,11 +42,6 @@ class FileManagerServiceProvider extends ServiceProvider
     {
         // Routes using scopes
         include __DIR__.'/../../routes/fileManager.php';
-
-        Event::listen(
-            AttachmentDeleted::class,
-            [DeleteAttachmentDependency::class, 'handle']
-        );
     }
 
     /**

@@ -34,10 +34,10 @@ return [
             'thumbnail' => [
                 'width' => 300,
                 'height' => 0,
-                'attachment_type_id' => 10
+                'attachment_type_id' => 65000
             ],
             'regular_comression' => [
-                'attachment_type_id' => 11,
+                'attachment_type_id' => 65001,
                 'resolutions' => [
                     [
                         'width' => 1024,

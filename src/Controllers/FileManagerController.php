@@ -34,15 +34,35 @@ class FileManagerController extends BaseController
     }
 
     /**
+     * Store File
      *
+     * @param UploadedFile $objFile
+     * @param Object $objAttachable
+     * @param string $strAttachable
+     * @param string $strPath
+     * @param string $permission
+     * @param bool $compressFile
      */
-    public static function storeFile(UploadedFile $objFile, $objAttachable, $strAttachable, $strPath='test/', $premission = null, $compressFile = false)
+    public static function storeFile(UploadedFile $objFile, $objAttachable, string $strAttachable, string $strPath='test/', string $premission = null, bool $compressFile = false)
     {
         // Store File Content
         return self::storeContent($objFile->get(), $objFile->getClientOriginalName(), $objFile->getMimeType(), $objFile->extension(), $objAttachable, $strAttachable, $strPath, $premission, $compressFile);
     }
 
-    public static function storeContent($content, $strFileName, $strMimeType, $strExtension, $objAttachable, $strAttachable, $strPath='test/', $premission = null, $compressFile = false)
+    /**
+     * Store Content
+     *
+     * @param string $content
+     * @param string $strFileName
+     * @param string $strMimeType
+     * @param string $strExtension
+     * @param Object $objAttachable
+     * @param string $strAttachable
+     * @param string $strPath
+     * @param string $permission
+     * @param bool $compressFile
+     */
+    public static function storeContent($content, string $strFileName, string $strMimeType, string $strExtension, $objAttachable, string $strAttachable, string $strPath='test/', string $premission = null, bool $compressFile = false)
     {
         $objMorph = $objAttachable->$strAttachable();
 
@@ -78,20 +98,20 @@ class FileManagerController extends BaseController
         $objAttachment->status = 'Uploaded';
         $objAttachment->save();
 
-        if(!$compressFile) {
+        if (!$compressFile) {
             return $objAttachment;
         }
 
-        if(Str::startsWith($objAttachment->mime_type, 'image/')) {
+        if (Str::startsWith($objAttachment->mime_type, 'image/')) {
             $compressionInfo = config('yuyuStorage.compress.image');
 
-            if(!empty($compressionInfo['thumbnail'])) {
+            if (!empty($compressionInfo['thumbnail'])) {
                 CompressImage::dispatch($objAttachment, base64_encode($content), 'thumbnail', $compressionInfo['thumbnail']['width'], $compressionInfo['thumbnail']['height']);
             }
 
-            if(!empty($compressionInfo['regular_comression'])) {
+            if (!empty($compressionInfo['regular_comression'])) {
                 $typeId = $compressionInfo['regular_comression']['attachment_type_id'];
-                foreach($compressionInfo['regular_comression']['resolutions'] as $resolution) {
+                foreach ($compressionInfo['regular_comression']['resolutions'] as $resolution) {
                     CompressImage::dispatch($objAttachment, base64_encode($content), 'compressedImages', $resolution['width'], $resolution['height']);
                 }
             }
@@ -100,7 +120,17 @@ class FileManagerController extends BaseController
         return $objAttachment;
     }
 
-    public static function getAccessUrl($intAttachmentId, $strType='view', $intExpireAfter=2628000, $authType = 'SECURE')
+    /**
+     * Get access url
+     *
+     * @param int $intAttachmentId
+     * @param string $strType
+     * @param int $intExpireAfter
+     * @param string $authType
+     *
+     * @return string
+     */
+    public static function getAccessUrl(int $intAttachmentId, string $strType='view', int $intExpireAfter=2628000, string $authType = 'SECURE'): string
     {
         $arrToken = [
             'id' => $intAttachmentId,
@@ -145,9 +175,17 @@ class FileManagerController extends BaseController
         return $url .'?_token=' .$token;
     }
 
-    public static function viewFile($intAttachmentId, Request $request)
+    /**
+     * View File
+     *
+     * @param int $intAttachmentId
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public static function viewFile(int $intAttachmentId, Request $request): Response
     {
-        $attachment = Attachment::find($intAttachmentId);
+        $attachment = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($intAttachmentId);
         $arrMimeType = explode('/', $attachment->mime_type);
         $content = Storage::get($attachment->upload_path .$attachment->id .'.' .$attachment->extension);
 
@@ -166,13 +204,28 @@ class FileManagerController extends BaseController
         return $objResponse;
     }
 
-    public static function downloadFile($intAttachmentId, Request $request)
+    /**
+     * Download File
+     *
+     * @param int $intAttachmentId
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public static function downloadFile(int $intAttachmentId, Request $request): Response
     {
-        $attachment = Attachment::find($intAttachmentId);
+        $attachment = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($intAttachmentId);
         return Storage::download($attachment->upload_path .$attachment->id .'.' .$attachment->extension, $attachment->original_file_name);
     }
 
-    private static function applyCaching(Response $objResponse)
+    /**
+     * Apply caching
+     *
+     * @param Response $objResponse
+     *
+     * @return Response
+     */
+    private static function applyCaching(Response $objResponse): Response
     {
         if (config('yuyuStorage.cache.enabled', false)) {
             $cacheAge = config('yuyuStorage.cache.duration', 365) * 86400;
@@ -183,14 +236,23 @@ class FileManagerController extends BaseController
         return $objResponse;
     }
 
-    private static function generateS3Url(int $intAttachmentId, $strType, $intExpireAfter) {
-        $attachment = Attachment::find($intAttachmentId);
+    /**
+     * Generate S3 URL
+     *
+     * @param int $intAttachmentId
+     * @param string $strType
+     * @param int $intExpireAfter
+     *
+     * @return void
+     */
+    private static function generateS3Url(int $intAttachmentId, string $strType, int $intExpireAfter)
+    {
+        $attachment = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($intAttachmentId);
         $arrMimeType = explode('/', $attachment->mime_type);
         $filePath = $attachment->upload_path .$attachment->id .'.' .$attachment->extension;
-        if($strType === 'download') {
+        if ($strType === 'download') {
             return Storage::temporaryUrl($filePath, now()->addMinutes($intExpireAfter));
-        }
-        else {
+        } else {
             return Storage::temporaryUrl(
                 $filePath,
                 now()->addMinutes($intExpireAfter),
@@ -200,9 +262,11 @@ class FileManagerController extends BaseController
                 ]
             );
         }
-
     }
 
+    /**
+     * Process Image
+     */
     private static function processImage($content, $format)
     {
         $imagine = (new Imagine())->load($content);
@@ -217,5 +281,18 @@ class FileManagerController extends BaseController
         }
 
         return $content;
+    }
+
+    public function moveAttachment(Attachment $attachment, Request $request)
+    {
+        if ($attachment->after_attachment) {
+            $attachment->seq_no = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($request->after_attachment)->seq_no + 1;
+        } else {
+            $attachment->seq_no = 0;
+        }
+
+        $attachment->save();
+
+        return $attachment;
     }
 }

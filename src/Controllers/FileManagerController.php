@@ -285,7 +285,7 @@ class FileManagerController extends BaseController
 
     public function moveAttachment(Attachment $attachment, Request $request)
     {
-        if ($attachment->after_attachment) {
+        if ($request->after_attachment) {
             $attachment->seq_no = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($request->after_attachment)->seq_no + 1;
         } else {
             $attachment->seq_no = 0;

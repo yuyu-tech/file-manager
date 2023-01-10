@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "spatie/image": "^2.2.2"
+        "spatie/image": "*"
     },
     "autoload": {
         "psr-4": {

@@ -6,6 +6,9 @@
         "file manager"
     ],
     "type": "library",
+    "require": {
+        "spatie/image": "*"
+    },
     "license": "MIT",
     "authors": [
         {
@@ -13,9 +16,6 @@
             "email": "bhushanmer@gmail.com"
         }
     ],
-    "require": {
-        "spatie/image": "2.2.4"
-    },
     "autoload": {
         "psr-4": {
             "Yuyu\\FileManager\\": "src/"
@@ -27,7 +27,7 @@
                 "Yuyu\\FileManager\\Providers\\FileManagerServiceProvider"
             ],
             "aliases": {
-                "FileManager": "Yuyu\\FileManager\\Facades\\FileManagerFacade"
+                "FileManager" : "Yuyu\\FileManager\\Facades\\FileManagerFacade"
             }
         }
     },

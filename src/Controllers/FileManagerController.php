@@ -17,6 +17,7 @@ use Yuyu\FileManager\Models\Attachment;
 use Yuyu\FileManager\Jobs\CompressImage;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Routing\Controller as BaseController;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileManagerController extends BaseController
 {
@@ -210,9 +211,9 @@ class FileManagerController extends BaseController
      * @param int $intAttachmentId
      * @param Request $request
      *
-     * @return Response
+     * @return Response|StreamedResponse
      */
-    public static function downloadFile(int $intAttachmentId, Request $request): Response
+    public static function downloadFile(int $intAttachmentId, Request $request): Response|StreamedResponse
     {
         $attachment = config('yuyuStorage.attachment_class', 'Yuyu\FileManager\Models\Attachment')::find($intAttachmentId);
         return Storage::download($attachment->upload_path .$attachment->id .'.' .$attachment->extension, $attachment->original_file_name);

@@ -20,8 +20,13 @@ Route::middleware(['web', 'auth', 'StorageAccessValidator'])->prefix('web/storag
     Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile')->name('web.view.file');
     Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile')->name('web.download.file');
 });
+$guards = array_keys(config("auth.guards", []));
+$guards = array_filter($guards, function($guard) {
+    return $guard !== 'web';
+});
+$guards = implode(',', $guards);
 
-Route::middleware(['web', 'auth:api', 'StorageAccessValidator'])->prefix('api/storage/')->group(function () {
-    Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile');
-    Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile');
+Route::middleware(["auth:{$guards}", 'StorageAccessValidator'])->prefix('api/storage/')->group(function () {
+    Route::get('/view/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@viewFile')->name('api.view.file');;
+    Route::get('/download/{attachmentId}', '\Yuyu\FileManager\Controllers\FileManagerController@downloadFile')->name('api.download.file');
 });
